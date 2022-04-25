@@ -23,4 +23,4 @@ Attention plot is allowed to use direct string sequences or testing dataset. Str
 ## Commands
 python main.py
 
-Revision is still in progress, more functons will be updated soon.
+##### Revision is still in progress, more functons will be updated soon.
