@@ -146,8 +146,8 @@ def acc_(test_data):
 ####### Main Loop #########
 # Data Loading
 # The filename is changed to your targeting directory
-filename_inp = '../Desktop/ML_Project/Code_Txt_ARM/Ford_Fulkerson_2.txt'
-filename_targ = '../Desktop/ML_Project/Code_Txt_x86/Ford_Fulkerson_2.txt'
+filename_inp = './Code_Txt_ARM/Ford_Fulkerson_2.txt'
+filename_targ = './Code_Txt_x86/Ford_Fulkerson_2.txt'
 file_inp = preprocessing.loading_(filename_inp)
 file_targ = preprocessing.loading_(filename_targ)
 
@@ -212,7 +212,7 @@ optimizer = tf.keras.optimizers.Adam()
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
 
 # Checkpoint - Changed to local directories
-checkpoint_dir = '../Desktop/ML_Project/checkpoints_GRU_FK2_500'
+checkpoint_dir = './checkpoints_GRU_FK2_500'
 checkpoint_prefix = os.path.join(checkpoint_dir, 'ckpt')
 checkpoint = tf.train.Checkpoint(optimizer=optimizer, encoder=encoder, decoder=decoder)
 
