@@ -23,12 +23,12 @@ from GRU import Encoder, Attention, Decoder
 from sklearn.model_selection import train_test_split
 ######
 
-# Environment Adjustment
+# Environment Adjustment (optional in different situations)
 sys.setrecursionlimit(10**7)
 os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-# Loss func
+# Loss function - Sparse Categorical Entropy Cross Loss with masks
 def loss_function(real, pred):
 	mask = tf.math.logical_not(tf.math.equal(real, 0))
 	loss = loss_object(real, pred)
@@ -59,8 +59,10 @@ def training(inp, targ, enc_hidden):
 
 	return batch_loss
 
+# Testing
 def testing(inp, enc_hidden):
 	with tf.GradientTape() as tape:	
+		# Unannotate the following three lines if trying to use LSTM model
 		#enc_output, enc_hidden_h, enc_hidden_c = encoder(inp, enc_hidden)
 		#dec_input = tf.expand_dims([tokenizer_targ.word_index['start']]*enc_hidden_h.shape[0], 1)
 		#pred, dec_hidden_h, dec_hidden_c, attention_weights = decoder(dec_input, enc_hidden_h, enc_hidden_c, enc_output)
@@ -70,7 +72,7 @@ def testing(inp, enc_hidden):
 		pred_id = tf.argmax(pred[0]).numpy()
 	return pred, attention_weights
 
-# Performance evaluation
+# Performance evaluation - For Attention Plot
 def evaluation(test_data):
 	attention_plot = np.zeros((max_len_targ, max_len_inp))
 	result = ''
@@ -118,6 +120,7 @@ def trans_(seq_):
 	attention_plot = attention_plot[: len(result.split(' ')), : len(test_data.split(' '))]
 	plot_attention(attention_plot, test_data.split(' '), result.split(' '))
 
+# Accuracy calculations with target files
 def acc_(test_data):
 	enc_hidden = encoder.initialize_hidden_state()
 	for (batch, (inp, targ)) in enumerate(test_data):
@@ -142,12 +145,14 @@ def acc_(test_data):
 
 ####### Main Loop #########
 # Data Loading
+# The filename is changed to your targeting directory
 filename_inp = '../Desktop/ML_Project/Code_Txt_ARM/Ford_Fulkerson_2.txt'
 filename_targ = '../Desktop/ML_Project/Code_Txt_x86/Ford_Fulkerson_2.txt'
-trans_start = time.time()
 file_inp = preprocessing.loading_(filename_inp)
 file_targ = preprocessing.loading_(filename_targ)
 
+# Start timing to see the final translation time
+trans_start = time.time()
 
 # Word Preprocessing
 data_inp, idx_inp = preprocessing.word_preprocessing(file_inp)
@@ -171,10 +176,9 @@ tensor_inp, tokenizer_inp = preprocessing.token(code_inp)
 tensor_targ, tokenizer_targ = preprocessing.token(code_targ)
 max_len_inp, max_len_targ = tensor_inp.shape[1], tensor_targ.shape[1]
 
-# token2word table
+# token2word table - Show the tokens corresponding to characters
 #token2word(tensor_inp[0], tokenizer_inp)
 #token2word(tensor_targ[0], tokenizer_targ)
-
 
 # Training Dataset Formation
 # Split
@@ -182,16 +186,16 @@ train_inp, test_inp, train_targ, test_targ = train_test_split(tensor_inp, tensor
 
 # Parameters Definition
 buf_size = len(train_inp)
-buf_size_test = len(tensor_inp)
+#buf_size_test = len(tensor_inp)
 batch_size = 64
 steps = len(train_inp) // batch_size
-steps_test = len(tensor_inp) // batch_size
+#steps_test = len(tensor_inp) // batch_size
 vocab_size_inp = len(tokenizer_inp.word_index) + 1
 vocab_size_targ = len(tokenizer_targ.word_index) + 1
 units = 512
 embedding_dim = 256
 
-# Tensor2slices
+# Tensor2slices - Fit with tensorflow models
 dataset = preprocessing.tensor2slices(train_inp, train_targ, batch_size)
 
 # Encoder
@@ -207,19 +211,19 @@ decoder = Decoder(vocab_size_targ, embedding_dim, units, batch_size)
 optimizer = tf.keras.optimizers.Adam()
 loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True, reduction='none')
 
-# Checkpoint
+# Checkpoint - Changed to local directories
 checkpoint_dir = '../Desktop/ML_Project/checkpoints_GRU_FK2_500'
 checkpoint_prefix = os.path.join(checkpoint_dir, 'ckpt')
 checkpoint = tf.train.Checkpoint(optimizer=optimizer, encoder=encoder, decoder=decoder)
 
 
-# Restore Checkpoint
+# Restore Checkpoint if existed
 if (os.path.isdir(checkpoint_dir) == True):
 	checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
 
-"""
-# Training
+# Training Loop
 EPOCHS = 500
+# loss_standard is to determine the point start saving checkpoints
 loss_standard = 0.8
 loss_per_epoch = [1]
 cost_time = []
@@ -246,9 +250,13 @@ for epoch in range(EPOCHS):
 
 	print('Epoch {} Loss {:.4f}'.format(epoch + 1, total_loss / steps))
 	print('Time taken for 1 epoch {} sec\n'.format(time.time() - start))
-"""
+	
+# Save Loss & Cost-Time Fig
+store_loss_dir = './checkpoints_GRU_FK2_500_2'
+store_time_dir = './checkpoints_GRU_FK2_500_2'
+savefile(store_loss_dir, 'loss_per_epoch.txt', loss_per_epoch)
+savefile(store_time_dir, 'cost_time.txt', cost_time)
 
-"""
 # Plot Loss & Cost-time Fig
 fig = plt.figure(figsize = (8,8))
 ax = fig.add_subplot(1,1,1) 
@@ -273,10 +281,8 @@ plt.savefig('Time_GRU_FK2.png')
 # Seq Translate
 setence = ''
 trans_(sentence)
-"""
 
 # Prediction & Acc
-#testing_dataset = tensor2slices(test_arm, test_x86, batch_size)
 testing_dataset = preprocessing.tensor2slices(test_inp, test_targ, batch_size)
 y_pred, attention_weights = acc_(testing_dataset)
 
@@ -292,20 +298,15 @@ for idx, data in enumerate(test_inp):
 		word_id = data[id]
 		if (word_id != 0):
 			if (id in large_weights_idx):
+				# To print the generated text with error
 				#print(colored(tokenizer_arm.index_word[word_id], 'red'), end=' ')
 				incorrect += 1
 			else:
+				# To print the correct generated text
 				#print(tokenizer_arm.index_word[word_id], end=' ')
 				correct += 1
 	#print('\n')
 print("Acc: ", 100*((correct)/(correct+incorrect)), "%")
 print("Translation Time: ", time.time()-trans_start, "sec")
 print("total Code Blocks: ", len(test_inp))
-
-"""
-# Save Loss & Cost-Time Fig
-store_loss_dir = './checkpoints_GRU_FK2_500_2'
-store_time_dir = './checkpoints_GRU_FK2_500_2'
-savefile(store_loss_dir, 'loss_per_epoch.txt', loss_per_epoch)
-savefile(store_time_dir, 'cost_time.txt', cost_time)
-"""
+print("Translation and Accuracy Calculation are done!")
