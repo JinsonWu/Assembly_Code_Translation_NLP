@@ -16,7 +16,7 @@ from itertools import chain
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 ######
-
+# Tokenize the characters inside the sequences
 def token(text):
 	tokenizer = Tokenizer(num_words=None, lower=False, split=' ')
 	tokenizer.fit_on_texts(text)
@@ -25,12 +25,15 @@ def token(text):
 
 	return tensor, tokenizer
 
+# Show table of tokens corresponding to the characters
 def token2word(tensor, tokenizer):
 	for t in tensor:
 		if (t != 0):
+			# Open this open when you want to output the table
 			#print('%d ----> %s' % (t, tokenizer.index_word[t]))
 			pass
 
+# Determine whether it is a loop with 'L' or 'l' in the beginning
 def find_loop(code, i, i_):
 	arr = code[i:i+i_]
 	flag = False
@@ -45,6 +48,7 @@ def find_loop(code, i, i_):
 
 	return flag
 
+# Determine whether it is a loop with '_' in the beginning
 def find_dash(code, i, i_):
 	#flag_loop = find_loop(code, i-7, 8) 
 	# First Check whether it has loop beforehand
@@ -67,8 +71,8 @@ def find_dash(code, i, i_):
 
 	return flag
 
+# Concatenate the characters (symbols) in to a whole sequence
 def word2seq(code):
-	# Concatenate the characters (symbols) in to a whole sequence
 	arr = []
 	for i, x in enumerate(code):
 		arr.append(''.join(code[i]))
@@ -86,6 +90,7 @@ def tuple_(data1, data2):
 
 	return tuple(t)
 
+# Primary data preprocessing
 def word_preprocessing(code):
 	# Eliminate Redundant Elements & Make the '\' and '\n' into ' '
 	code.pop(0)
@@ -98,7 +103,7 @@ def word_preprocessing(code):
 				code[i] = ' '
 		i += 1
 
-	# Create Dataset with Seqs
+	# Create Dataset with Seqs and split them into code blocks
 	a = []
 	i_ = 0
 	x_ = 0
@@ -139,15 +144,18 @@ def loading_(filename):
 
 	return code_
 
+# Return the length of 2d-list
 def list_2d_len(l):
 	l_ = chain.from_iterable(l)
 	return len(list(l_))
 
+# Padding spaces in the tail of code blocks to form identical group (code block) numbers
 def padding_(inp, targ):
 	i = 0
 	j = 0
 	len_inp = list_2d_len(inp)
 	len_targ = list_2d_len(targ)
+	# Standard - 'GCD(inp, arm) > root(inp+arm)'
 	while(math.gcd(len_targ, (len_inp+j)) < int(math.sqrt((len_targ + len_inp+j)))):
 		inp[i] = inp[i] + ' '
 		j += 1
@@ -170,11 +178,12 @@ def shuffle2groups(inp, targ):
 
 	return inp_, targ_
 
+# Add start and end to each sequence for training
 def paddingword(data):
 	data = '<start>' + ' ' + data + ' ' + '<end>'
 	return data
 
-# Tensor2Slices
+# Tensor2Slices and shuffling
 def tensor2slices(inp, targ, batch_size):
 	buf_size = len(targ)
 	batch_size = batch_size
@@ -183,6 +192,7 @@ def tensor2slices(inp, targ, batch_size):
 
 	return dataset
 
+# Save loss_per_epoch and cost_time list files
 def savefile(dir_, filename, list_):
 	if (os.path.isdir(dir_) != True):
 	    os.path.join(dir_, filename)
