@@ -2,7 +2,7 @@
 Translate the cross-architectural assembly code, e.g. from arm to x86, with NLP-based models. Encoder-Attention-Decoder structure is adopted in this project to fit in with various sequence length. Encoder and decoder unit are both implemented in three different NLP models, which are SimpleRNN, LSTM, and GRU. The pre-trained GRU-based model can achieve 93% of accuracy and great translation efficiency. 
 
 ## Input Description
-All .txt file containing assembly codes are acceptable for training.
+Firstly translate .c or .cpp codes to .s file with GCC/G++ compiler, then replacing the files with .txt format. All .txt file containing assembly codes are acceptable for training.
 
 ## Hyperparameter
 Inital batch_size = 64, embedding_dim = 256, hidden_units = 512. Above variables and epochs can be changed depending on the need of accuracy and computing ability. 
