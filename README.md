@@ -26,3 +26,7 @@ Attention plot is allowed to use direct string sequences or testing dataset. Str
 python main.py
 
 ##### Revision is still in progress, more functons will be updated soon.
+
+## Contact Info
+Author: Chun-Sheng Wu, MS student in Computer Engineering @ Texas A&M University
+Email: jinsonwu@tamu.edu
