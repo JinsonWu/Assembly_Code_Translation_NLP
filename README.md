@@ -30,10 +30,13 @@ Attention plot is allowed to use direct string sequences or testing dataset. Str
 ## Commands
 python main.py
   
-
-
+ 
 ## Contact Info
 Author: Chun-Sheng Wu, MS student in Computer Engineering @ Texas A&M University  
-Email: jinsonwu@tamu.edu
+Email: jinsonwu@tamu.edu  
+LinkedIn: https://www.linkedin.com/in/chunshengwu/
 
-##### Revision is still in progress, more functons will be updated soon.
+##### Revision is still in progress, more functons will be updated soon.  
+
+
+
